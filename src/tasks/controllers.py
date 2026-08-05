@@ -11,18 +11,21 @@ def create_task(body: TaskCreateDTO, db: Session):
     db.add(new_task)
     db.commit()
     db.refresh(new_task)
-    return {"message": "Task created successfully", "data": new_task}
+    # return {"message": "Task created successfully", "data": new_task}
+    return new_task
 
 def get_tasks(db: Session):
     tasks = db.query(TaskModel).all()
-    return {"message": "Tasks retrieved successfully", "data": tasks}
+    # return {"message": "Tasks retrieved successfully", "data": tasks}
+    return tasks
 
 def get_task_by_id(task_id: int, db: Session):
     task = db.query(TaskModel).get(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     
-    return {"message": "Task retrieved successfully", "data": task}
+    # return {"message": "Task retrieved successfully", "data": task}
+    return task
 
 def update_task(task_id: int, body: TaskCreateDTO, db: Session):
     task = db.query(TaskModel).get(task_id)
@@ -39,7 +42,8 @@ def update_task(task_id: int, body: TaskCreateDTO, db: Session):
     # db.add(task)
     db.commit()
     db.refresh(task)
-    return {"message": "Task updated successfully", "data": task}
+    # return {"message": "Task updated successfully", "data": task}
+    return task
 
 def delete_task(task_id: int, db: Session):
     task = db.query(TaskModel).get(task_id)
@@ -48,4 +52,4 @@ def delete_task(task_id: int, db: Session):
 
     db.delete(task)
     db.commit()
-    return {"message": "Task deleted successfully"}
+    return None
