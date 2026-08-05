@@ -1,9 +1,10 @@
 from sqlalchemy.orm import Session
 from src.user.dtos import UserDTO, LoginSchema
 from src.user.models import UserModel
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Request
 from pwdlib import PasswordHash
 import jwt
+from jwt.exceptions import InvalidTokenError
 from src.utils.settings import settings
 from datetime import datetime, timedelta
 
@@ -46,12 +47,30 @@ def login(db: Session, login_schema: LoginSchema):
     if not verify_password(login_schema.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
 
-    exp_time = datetime.now() + timedelta(minutes= settings.EXP_TIME)
+    exp_time = datetime.now() + timedelta(minutes=settings.EXP_TIME)
 
-    token = jwt.encode(payload={"user_id": user.id, "exp": exp_time}, key=settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    token = jwt.encode(payload={"user_id": user.id, "exp": exp_time.timestamp()}, key=settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
     return {"access_token": token, "user_id": user.id}
 
-    # return user
-    # print(login_schema)
-    # return {"message": "Login successful"}
+def is_authenticated(request: Request, db: Session):
+    try:
+        token = request.headers.get("authorization")
+        if not token:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="unauthorized")
+        token = token.split(" ")[-1]
+
+        data = jwt.decode(token, settings.SECRET_KEY, settings.ALGORITHM)
+        user_id = data.get("user_id")
+        exp_time = int(data.get("exp"))
+
+        current_time = datetime.now().timestamp()
+        if current_time > exp_time:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="unauthorized")
+
+        user = db.query(UserModel).filter(UserModel.id == user_id).first()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="unauthorized")
+        return user
+    except InvalidTokenError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="unauthorized")
