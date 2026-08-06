@@ -14,7 +14,7 @@ def create_task(body: TaskCreateDTO, db: Session = Depends(get_db), user: UserMo
 
 @tasks_router.get("/all_tasks", response_model=list[TaskResponseDTO], status_code=status.HTTP_200_OK)
 def get_tasks(db: Session = Depends(get_db), user: UserModel = Depends(is_authenticated)):
-    return controllers.get_tasks(db)
+    return controllers.get_tasks(db, user)
 
 @tasks_router.get("/one_task/{task_id}", response_model=TaskResponseDTO, status_code=status.HTTP_200_OK)
 def get_task_by_id(task_id: int, db: Session = Depends(get_db), user: UserModel = Depends(is_authenticated)):
@@ -22,8 +22,8 @@ def get_task_by_id(task_id: int, db: Session = Depends(get_db), user: UserModel 
 
 @tasks_router.put("/update_task/{task_id}", response_model=TaskResponseDTO, status_code=status.HTTP_200_OK)
 def update_task(task_id: int, body: TaskCreateDTO, db: Session = Depends(get_db), user: UserModel = Depends(is_authenticated)):
-    return controllers.update_task(task_id, body, db)
+    return controllers.update_task(task_id, body, db, user)
 
 @tasks_router.delete("/delete_task/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_task(task_id: int, db: Session = Depends(get_db), user: UserModel = Depends(is_authenticated)):
-    return controllers.delete_task(task_id, db)
+    return controllers.delete_task(task_id, db, user)

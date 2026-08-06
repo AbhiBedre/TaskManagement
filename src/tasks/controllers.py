@@ -21,8 +21,9 @@ def create_task(body: TaskCreateDTO, db: Session, user: UserModel):
     # return {"message": "Task created successfully", "data": new_task}
     return new_task
 
-def get_tasks(db: Session):
-    tasks = db.query(TaskModel).all()
+def get_tasks(db: Session, user: UserModel):
+    # tasks = db.query(TaskModel).all()
+    tasks = db.query(TaskModel).filter(TaskModel.user_id == user.id).all()
     # return {"message": "Tasks retrieved successfully", "data": tasks}
     return tasks
 
@@ -34,10 +35,13 @@ def get_task_by_id(task_id: int, db: Session):
     # return {"message": "Task retrieved successfully", "data": task}
     return task
 
-def update_task(task_id: int, body: TaskCreateDTO, db: Session):
+def update_task(task_id: int, body: TaskCreateDTO, db: Session, user: UserModel):
     task = db.query(TaskModel).get(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
+
+    if task.user_id != user.id:
+        raise HTTPException(status_code=403, detail="You are not authorized to update this task")
 
     # Update the task attributes using the model_dump method, user can update single or multiple attributes at once
     for key, value in body.model_dump().items():
@@ -56,6 +60,9 @@ def delete_task(task_id: int, db: Session):
     task = db.query(TaskModel).get(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
+
+    if task.user_id != user.id:
+        raise HTTPException(status_code=403, detail="You are not authorized to delete this task")
 
     db.delete(task)
     db.commit()
