@@ -10,3 +10,4 @@ class TaskResponseDTO(BaseModel):
     title: str
     description: str
     is_completed: bool = False
+    user_id: int | None = None

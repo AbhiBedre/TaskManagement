@@ -1,7 +1,7 @@
 from fastapi import Request, HTTPException, status, Depends
 from sqlalchemy.orm import Session
 from src.user.models import UserModel
-from src.utils import settings
+from src.utils.settings import settings
 import jwt
 from jwt.exceptions import InvalidTokenError
 from src.utils.db import get_db

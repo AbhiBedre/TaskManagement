@@ -9,11 +9,3 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(name="My FastAPI Application", description="This is a sample FastAPI application.", version="1.0.0")
 app.include_router(tasks_router)
 app.include_router(user_routes)
-
-print("\n=== Registered Routes ===")
-
-for route in app.routes:
-
-    print(route.path, route.methods)
-
-print("=========================\n")

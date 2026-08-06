@@ -8,3 +8,5 @@ class TaskModel(Base):
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
     is_completed = Column(Boolean, default=False)
+
+    user_id = Column(Integer, ForeignKey("users.id", ondelete = "CASCADE"))
