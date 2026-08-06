@@ -52,25 +52,3 @@ def login(db: Session, login_schema: LoginSchema):
     token = jwt.encode(payload={"user_id": user.id, "exp": exp_time.timestamp()}, key=settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
     return {"access_token": token, "user_id": user.id}
-
-def is_authenticated(request: Request, db: Session):
-    try:
-        token = request.headers.get("authorization")
-        if not token:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="unauthorized")
-        token = token.split(" ")[-1]
-
-        data = jwt.decode(token, settings.SECRET_KEY, settings.ALGORITHM)
-        user_id = data.get("user_id")
-        exp_time = int(data.get("exp"))
-
-        current_time = datetime.now().timestamp()
-        if current_time > exp_time:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="unauthorized")
-
-        user = db.query(UserModel).filter(UserModel.id == user_id).first()
-        if not user:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="unauthorized")
-        return user
-    except InvalidTokenError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="unauthorized")
